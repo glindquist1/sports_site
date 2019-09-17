@@ -3,14 +3,23 @@ from django.http import HttpResponse
 #from django.template import loader
 import statsapi
 
-def index(request):
-	# return HttpResponse("You're at the the sports index")
-	x = statsapi.lookup_player('eloy jimenez')
-	context = {'player_name': x}
-	return render(request, 'sports/index.html', context)
+from .forms import NameForm
 
-# def home(request):
-# 	#player = 
-# 	return render(request, 'templates/sports/home.html', {
-# 		'player_name': statsapi.lookup_player('eloy jimenez')
-# 	})
+def home(request):
+	if request.method == 'POST':
+		#creates a form instance, and populates it with the data from the request
+		form = NameForm(request.POST)
+		if form.is_valid():
+			#when the data within the form is checked for validity, it is then stored in form.cleaned_data
+			#return HttpResponseRedirect('/example/')
+			context = {'post_output': statsapi.lookup_player(form.cleaned_data['search_name'])[0]['primaryNumber']}
+			print(context)
+			return render(request, 'sports/home.html', context)
+			#render(request, 'sports/home.html', {'form': form})
+		else:#if the form has not been submitted yet
+			form = NameForm()
+	#ie a GET request
+	else:
+		form = NameForm()
+
+	return render(request, 'sports/home.html', {'form': form})
