@@ -1,10 +1,19 @@
+{% load static %}
+<link rel='stylesheet' href="{% static 'sports/style.css' %}">
+
+{% block content %}
 <h2>Enter a player name to find that player's number.</h2>
-<form action="{% url 'home' %}" method="post">
+<form action="{% url 'home' %}" method="get">
 	{% csrf_token %}
-	{{ form }}   
+	{{ form }}
 <input type="submit" name="submit" value="Submit" />
+
+{% if image.photo %}
+	<img src="{{ image.photo.url }}" alt="Player_Graph" height="42" width="42">
+{% endif %}
 </form><br/><br/>
 
-{% if post_output %}
-    Output: {{ post_output }}
+{% if number_output %}
+    Output: {{ number_output }}
 {% endif %}
+{% endblock %}
