@@ -7,9 +7,13 @@ from mysite import settings
 from django.contrib.staticfiles.urls import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+from .views import HomeView, get_data, ChartData
+
 urlpatterns = [
-	path('', views.home, name='home'),
+	path('', HomeView.as_view(), name='home'),
 	#path('plot', views.mplimage, name='mplimage')
+	path('api/data/', get_data, name='api-data'),
+	path('api/chart/data/', ChartData.as_view()),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
