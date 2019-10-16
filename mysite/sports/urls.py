@@ -7,6 +7,7 @@ from mysite import settings
 from django.contrib.staticfiles.urls import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+#from .views import HomeView, ChartData
 from .views import HomeView, get_data, ChartData
 
 urlpatterns = [

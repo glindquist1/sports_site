@@ -1,7 +1,7 @@
 # from django.shortcuts import render
 # from django.http import HttpResponse
 # #from django.template import loader
-# import statsapi
+
 
 # from pylab import figure, axes, pie, title
 # import matplotlib
@@ -17,6 +17,7 @@
 
 # import numpy as np
 
+import statsapi
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -25,10 +26,89 @@ from django.views.generic import View
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from django.contrib.auth.forms import UserCreationForm
+
+from .models import PlayerSearch
+
+from .forms import NameForm
+
+
+
 #option 1
 class HomeView(View):
+	form_class = UserCreationForm
 	def get(self, request, *args, **kwargs):
 		return render(request, 'sports/home.html', {"customers": 10})
+
+	# def post(self, request, *args, **kwargs):
+	# 	#post is getting called, even though it is not a true post, it is getting the results of a search term
+	# 	#pass the request data to the chart in this function
+	# 	print(request)
+	# 	form = NameForm(request.GET)
+	# 	print(form['search_text'])
+	# 	if form.is_valid():
+	# 		print(form.cleaned_data['search_text'])
+	# 		context = {'labels': form.cleaned_data['search_text'],
+	# 				'default_items': statsapi.lookup_player(form.cleaned_data['search_text'])[0]['primaryNumber']}
+
+	# 		print("MEEP")
+	# 		return render(request, 'sports/home.html', context)
+	# 	else:#if the form has not been submitted yet
+	# 		form = NameForm()
+	# 		print('Hello')
+
+	# 	return render(request, 'sports/home.html', {'form': form})
+	def post(self, request, *args, **kwargs):
+		search_text = request.POST.get('search_text')
+		print('bananas')
+
+		#change the graph data here
+		labels = [search_text]
+		default_items = [statsapi.lookup_player(search_text)[0]['primaryNumber']]
+
+		print(default_items[0])
+		data = {
+			"labels": labels,
+			"default": default_items,
+		}
+		# return Response(data,  template_name='sports/home.html')
+		return render(request, 'sports/home.html', data)
+
+#option 2
+#USE THIS ONE
+class ChartData(APIView):
+	#allow you to get data based on some authentication or permission
+	authentication_classes = []
+	permission_classes = []
+
+	print('this abcdefg')
+
+	def get(self, request, format=None):
+		labels = ['Player1', 'p2', 'p3', 'p4']
+		default_items = [7, 8, 1, 2]
+
+		data = {
+			# "labels": request.context.labels,
+			# "default": request.context.default_items,
+			"labels": labels,
+			"default": default_items,
+		}
+		return Response(data)
+
+	def post(self, request, *args, **kwargs):
+		search_text = request.POST.get('search_text')
+		print('bananas')
+
+		#change the graph data here
+		labels = [search_text]
+		default_items = [statsapi.lookup_player(search_text)[0]['primaryNumber']]
+
+		data = {
+			"labels": labels,
+			"default": default_items,
+		}
+		return Response(data)
+
 #option 3
 def get_data(request, *args, **kwargs):
 	#this is where i call the mlb api
@@ -38,23 +118,30 @@ def get_data(request, *args, **kwargs):
 	}
 	return JsonResponse(data)
 
+def create_post(request):
 
-#option 2
-#USE THIS ONE
-class ChartData(APIView):
-	#allow you to get data based on some authentication or permission
-	authentication_classes = []
-	permission_classes = []
+	print('this function was called')
+	posts = PlayerSearch.objects.all()
+	response_data = {}
 
-	def get(self, request, format=None):
-		labels = ['Player1', 'p2', 'p3', 'p4']
-		default_items = [7, 8, 1, 2]
-		data = {
-			"labels": labels,
-			"default": default_items,
+	if request.POST.get('action') == 'post':
+		search_text = request.POST.get('search_text')
 
-		}
-		return Response(data)
+		response_data['search_text'] = search_text
+
+		PlayerSearch.objects.create(
+				search_text = search_text
+			)
+
+		print('this happens')
+		return JsonResponse(response_data) #this is an HTTP Response subclass
+
+	return render(request, 'sports/home.html', {'posts':posts})
+
+def post(self, request, *args, **kwargs):
+
+	return render(request, self.template_name, {'form': form})
+
 
 # class ListUsers(APIView):
 #     """
